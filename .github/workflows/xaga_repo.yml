@@ -169,7 +169,7 @@ jobs:
             #echo "CONFIG_ZRAM_WRITEBACK=y" >> ./common/arch/arm64/configs/gki_defconfig
             #sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./common/arch/arm64/configs/gki_defconfig
             #sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./common/arch/arm64/configs/gki_defconfig
-          fi
+          # fi
           #禁用 defconfig 检查
           sed -i 's/check_defconfig//' ./common/build.config.gki
 
