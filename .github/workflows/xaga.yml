@@ -20,7 +20,7 @@ on:
         description: '是否安装 LZ4K 补丁'
         required: true
         type: choice
-        default: 'true'
+        default: 'false'
         options:
           - 'true'
           - 'false'
@@ -28,7 +28,7 @@ on:
         description: '是否安装风驰内核驱动'
         required: true
         type: choice
-        default: 'true'
+        default: 'false'
         options:
           - 'true'
           - 'false'
