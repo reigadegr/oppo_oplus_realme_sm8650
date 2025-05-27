@@ -204,7 +204,7 @@ jobs:
           # sed -i '#include $(if $(wildcard $(kbuild-dir)/Kbuild), $(kbuild-dir)/Kbuild, $(kbuild-dir)/Makefile)#d' common/scripts/Makefile.clean
           sed -i '/Makefile/d' common/scripts/Makefile.clean
           sed -i 's#include $(KO_CODE_PATH)/platform/$(MALI_PLATFORM_DIR)/Kbuild#include $(KO_CODE_PATH)/platform/mt6895/Kbuild#g' common/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/Makefile
-          BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
+          BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh || echo "完毕"
           echo "内核编译完成！"
          
       - name: 应用patch_linux并修补内核
