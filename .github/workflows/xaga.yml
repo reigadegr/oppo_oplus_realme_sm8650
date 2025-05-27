@@ -58,7 +58,8 @@ jobs:
       - name: 安装配置环境依赖
         run: |
           sudo apt update
-          # sudo apt upgrade -y
+          sudo apt upgrade -y
+          sudo apt install llvm clang cmake
           sudo apt-get install curl bison flex make binutils dwarves git lld pahole zip perl make gcc python3 python-is-python3 bc libssl-dev libelf-dev -y
           sudo rm -rf ./llvm.sh
           sudo wget https://apt.llvm.org/llvm.sh
