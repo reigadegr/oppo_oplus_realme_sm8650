@@ -221,12 +221,16 @@ jobs:
           cd kernel_workspace
           git clone https://github.com/cctv18/AnyKernel3 --depth=1
           rm -rf ./AnyKernel3/.git
+          for i in $(find  . -name Image); do
+            echo $i
+            cp $i AnyKernel3
+          done
           cd AnyKernel3
-          cp ../common/out/arch/arm64/boot/Image ./Image
-          if [ ! -f ./Image ]; then
-            echo "未找到内核镜像文件，构建可能出错"
-            exit 1
-          fi
+          # cp ../common/out/arch/arm64/boot/Image ./Image
+          # if [ ! -f ./Image ]; then
+            # echo "未找到内核镜像文件，构建可能出错"
+            # exit 1
+          # fi
           if [[ ${{ github.event.inputs.lz4k_enable }} == "true" ]]; then
             wget https://raw.githubusercontent.com/Suxiaoqinx/kernel_manifest_OnePlus_Sukisu_Ultra/main/zram.zip
           fi
