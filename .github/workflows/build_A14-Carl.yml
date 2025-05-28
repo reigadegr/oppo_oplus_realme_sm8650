@@ -288,6 +288,7 @@ jobs:
           sed -i '/oplus/d' Kconfig.ext
           sed -i '/oplus/d' drivers/soc/Kconfig
           wget https://github.com/huifanghf/android_kernel_modules_oneplus_mt6895/raw/15/oplus/kernel/mm/mm_osvelte/mm-trace.h
+          [ -e "mm/mm-trace.h" ] && rm -rf mm/mm-trace.h
           cp -f mm-trace.h mm/
           make -j$(nproc --all) LLVM=-20 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnuabeihf- CC=clang LD=ld.lld HOSTCC=clang HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
           echo "内核编译完成！"
