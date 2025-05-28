@@ -122,7 +122,10 @@ jobs:
 
       - name: 应用 Hide Stuff 修补程序
         run: |
-          cd kernel_workspace/common
+          
+          cd kernel_workspace
+          git clone https://github.com/ShirkNeko/SukiSU_patch.git --depth 1
+          cd common
           cp ../SukiSU_patch/69_hide_stuff.patch ./
           patch -p1 < 69_hide_stuff.patch
           
