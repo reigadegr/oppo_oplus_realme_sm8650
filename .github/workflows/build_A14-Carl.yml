@@ -90,7 +90,8 @@ jobs:
       - name: 安装配置环境依赖
         run: |
           sudo apt-mark hold firefox
-          sudo apt update && sudo apt upgrade -y
+          sudo apt update -y
+          # sudo apt upgrade -y
           sudo apt-get install curl bison flex make binutils dwarves git lld pahole zip perl make gcc python3 python-is-python3 bc libssl-dev libelf-dev -y
           sudo rm -rf ./llvm.sh
           sudo wget https://apt.llvm.org/llvm.sh
@@ -284,6 +285,8 @@ jobs:
             cp -r ./sched_ext/* ./common/kernel/sched
           fi
           cd common
+          sed -i '/oplus/d' Kconfig.ext
+          sed -i '/oplus/d' drivers/soc/Kconfig
           make -j$(nproc --all) LLVM=-20 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnuabeihf- CC=clang LD=ld.lld HOSTCC=clang HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
           echo "内核编译完成！"
          
