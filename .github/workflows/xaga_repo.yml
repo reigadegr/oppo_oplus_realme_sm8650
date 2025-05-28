@@ -32,6 +32,16 @@ on:
         options:
           - 'true'
           - 'false'
+          
+      xaga_forge:
+        description: '使用forge版内核'
+        required: true
+        type: choice
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
+        
       kernel_suffix:
         description: '内核后缀(留空默认,开头别加连字符)'
         required: false
@@ -59,6 +69,7 @@ jobs:
         run: |
           echo "Selected scx_enable: ${{ github.event.inputs.scx_enable }}"
           echo "Selected lz4k: ${{ github.event.inputs.lz4k_enable }}"
+          echo "Selected xaga_forge: ${{ github.event.inputs.xaga_forge }}"
           
       - name: 安装配置环境依赖
         run: |
@@ -83,8 +94,13 @@ jobs:
           repo init --depth 1 -u https://android.googlesource.com/kernel/manifest -b common-android12-5.10
           repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
           rm -rf common
-          echo "正在克隆源码仓库..."
-          git clone --depth=1 https://github.com/xiaomi-mediatek-devs/android_kernel_xiaomi_mt6895 common -b lineage-22.2
+          echo "正在克隆源码仓库..."          
+          if [ "${{ github.event.inputs.xaga_forge }}" == "true" ]; then
+            git clone --depth=1 https://github.com/XagaForge/android_kernel_xiaomi_mt6895 common -b 15
+          else
+            git clone --depth=1 https://github.com/xiaomi-mediatek-devs/android_kernel_xiaomi_mt6895 common -b lineage-22.2
+          fi
+          
           echo "正在去除 ABI 保护 & 去除 dirty 后缀..."
           rm common/android/abi_gki_protected_exports_* || echo "不需要去除保护"
           for f in common/scripts/setlocalversion; do
