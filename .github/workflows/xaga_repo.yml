@@ -92,6 +92,14 @@ jobs:
           chmod a+x ~/repo
           sudo mv ~/repo /usr/local/bin/repo
           
+      - name: Restore ccache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.ccache
+          key: ccache-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+                      
       - name: 初始化源码仓库
         run: |
           rm -rf kernel_workspace && mkdir kernel_workspace && cd kernel_workspace
@@ -220,14 +228,6 @@ jobs:
               sed -i "\$s|echo \"\\\$res\"|echo \"-${{ env.KERNEL_NAME }}\"|" "$f"
             done
           fi
-
-      - name: Restore ccache
-        uses: actions/cache@v3
-        with:
-          path: /home/runner/.ccache
-          key: ccache-${{ runner.os }}-${{ github.ref }}
-          restore-keys: |
-            ccache-${{ runner.os }}-
                        
       - name: 构建内核
         run: |
