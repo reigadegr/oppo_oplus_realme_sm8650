@@ -9,7 +9,11 @@ env:
   KERNEL_NAME: 'android12-11-o-gca13bffobf09'
   KERNELSU_VARIANT: 'SukiSU-Ultra'
   KERNELSU_BRANCH: 'susfs-dev'
-
+  CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+  CCACHE_NOHASHDIR: "true"
+  CCACHE_HARDLINK: "true"
+  CCACHE_DIR: /home/runner/.ccache  
+  CCACHE_MAXSIZE: 8G
 on:
   workflow_dispatch:
   # 取消此处注释代码可开启每日定时编译
@@ -65,7 +69,7 @@ jobs:
           sudo apt update
           # sudo apt upgrade -y
           sudo apt install llvm clang cmake
-          sudo apt-get install curl bison flex make binutils dwarves git lld pahole zip perl make gcc python3 python-is-python3 bc libssl-dev libelf-dev -y
+          sudo apt-get install curl bison flex make binutils dwarves git lld pahole zip perl make gcc python3 python-is-python3 bc libssl-dev libelf-dev ccache -y
           # sudo rm -rf ./llvm.sh
           # sudo wget https://apt.llvm.org/llvm.sh
           # sudo chmod +x llvm.sh
@@ -188,7 +192,15 @@ jobs:
               sed -i "\$s|echo \"\\\$res\"|echo \"-${{ env.KERNEL_NAME }}\"|" "$f"
             done
           fi
-           
+          
+      - name: Restore ccache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.ccache
+          key: ccache-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+                       
       - name: 构建内核
         run: |
           cd kernel_workspace
@@ -200,6 +212,7 @@ jobs:
           fi
           
           export LTO=thin SYSTEM_DLKM_RE_SIGN=0 BUILD_SYSTEM_DLKM=0 KMI_SYMBOL_LIST_STRICT_MODE=0
+          export PATH="/usr/lib/ccache:$PATH"
           # cd common && make -j$(nproc --all) LLVM=-20 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnuabeihf- CC=clang LD=ld.lld HOSTCC=clang HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
           sed -i '/Makefile/d' common/scripts/Makefile.clean
           sed -i 's#include $(KO_CODE_PATH)/platform/$(MALI_PLATFORM_DIR)/Kbuild#include $(KO_CODE_PATH)/platform/mt6895/Kbuild#g' common/drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/Makefile
