@@ -177,11 +177,13 @@ jobs:
         run: |
           cd kernel_workspace
           cd common
-          # echo "extern int qcom_smem_alloc(unsigned host, unsigned item, size_t size);" >> drivers/soc/oplus/sensor/oplus_sensor_devinfo.h
-          sed -i '29iextern int qcom_smem_alloc(unsigned host, unsigned item, size_t size);' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
-          echo "CONFIG_OPLUS_FEATURE_SENSOR_CFG=n" >> arch/arm64/configs/gki_defconfig
+          # sed -i '10i#include <linux/soc/qcom/smem.h>' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
+          # echo "CONFIG_OPLUS_FEATURE_SENSOR_CFG=n" >> arch/arm64/configs/gki_defconfig
+          wget https://github.com/oplus-giulia-dev/android_kernel_oneplus_sm8650/raw/lineage-22.2/drivers/soc/qcom/smem.c
+          cat smem.c > tmp.c          
           sed -i '/get_project/d' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
-                     
+          cat drivers/soc/oplus/sensor/oplus_sensor_devinfo.c >> tmp.c
+          cat tmp.c > drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
       - name: 构建内核
         run: |
           cd kernel_workspace
