@@ -179,13 +179,10 @@ jobs:
           cd common
           # sed -i '10i#include <linux/soc/qcom/smem.h>' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
           # echo "CONFIG_OPLUS_FEATURE_SENSOR_CFG=n" >> arch/arm64/configs/gki_defconfig
+          wget https://github.com/reigadegr/oppo_oplus_realme_sm8650/raw/main/patch/oplus_sensor_devinfo.c
+          cp -f oplus_sensor_devinfo.c drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
           sed -i '/get_project/d' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
-          sed -i '/smem.h/d' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
-          sed -i 's/QCOM_SMEM_HOST_ANY/-1/g' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
-          wget https://github.com/oplus-giulia-dev/android_kernel_oneplus_sm8650/raw/lineage-22.2/drivers/soc/qcom/smem.c
-          cat drivers/soc/oplus/sensor/oplus_sensor_devinfo.c >> smem.c
-          cat smem.c > drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
-          sed -i '/smem.h/d' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
+          
           
       - name: 构建内核
         run: |
