@@ -177,7 +177,7 @@ jobs:
         run: |
           cd kernel_workspace
           cd common
-          echo "int qcom_smem_alloc(unsigned host, unsigned item, size_t size);" >> drivers/soc/oplus/sensor/oplus_sensor_devinfo.h
+          echo "extern int qcom_smem_alloc(unsigned host, unsigned item, size_t size);" >> drivers/soc/oplus/sensor/oplus_sensor_devinfo.h
           sed -i '/get_project/d' drivers/soc/oplus/sensor/oplus_sensor_devinfo.c
                      
       - name: 构建内核
