@@ -1,0 +1,127 @@
+name: 编译 mtk6771 安卓P 机型内核
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        type: choice
+        description: '设备型号'
+        required: true
+        options:
+        - '17061'
+        - '17197'
+        - '17331'
+        - '18011'
+        - '18161'
+        - '18311'
+        - '18531'
+        - '19091'
+        - '19151'
+        - '19350'
+        - '19391'
+        - '19531'
+      ksu:
+        type: choice
+        description: '集成ksu' 
+        options:
+        - 'ON'
+        - 'YES'
+        
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+
+
+    - name: 构建编译内核环境
+      run: |
+        sudo apt-get update
+        sudo -E apt-get -y -qq install git make bc bison ccache openssl dos2unix zip kmod cpio flex libelf-dev curl libssl-dev libtfm-dev wget device-tree-compiler ca-certificates python3 python2 libtinfo5 binutils-aarch64-linux-gnu binutils-arm-linux-gnueabi
+        mkdir -p $GITHUB_WORKSPACE/kernel_workspace
+
+
+
+    - name: 下载 Gcc编译器
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        
+        mkdir gcc64
+        wget -O gcc-aarch64.tar.gz https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/961622e926a1b21382dba4dd9fe0e5fb3ee5ab7c.tar.gz
+        tar -C gcc64/ -zxvf gcc-aarch64.tar.gz
+    
+        mkdir gcc32
+        wget -O gcc-arm.tar.gz https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/cb7b3ac1b7fdb49474ff68761909934d1142f594.tar.gz
+        tar -C gcc32/ -zxvf gcc-arm.tar.gz
+    
+    - name: 下载Clang编译器
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        mkdir clang-aosp
+        git clone -q --depth=1 https://github.com/wu17481748/android_prebuilts_clang_host_linux-x86_clang-4691093 clang-aosp
+    
+    
+    - name: 下载内核源码
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        git clone https://github.com/wu17481748/android_kernel_mtk6771 android-kernel
+        cd android-kernel
+
+
+
+    - name: 集成 ksu
+      if: github.event.inputs.ksu == 'YES'
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        rm -rf KernelSU
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
+ 
+
+               
+    - name: 设置ccache缓存
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: build-kernel-mido-kernel
+        max-size: 2G
+
+    - name: 切换python2.7
+      run: |
+       sudo rm /bin/python
+       sudo ln -s /bin/python2.7 /bin/python
+ 
+    - name: 开始编译内核
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        export TARGET_PRODUCT=full_oppo6771_${{ github.event.inputs.device }}
+        export OPPO_TARGET_DEVICE=oppo6771_${{ github.event.inputs.device }}
+        export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$GITHUB_WORKSPACE/kernel_workspace/gcc64/bin:$GITHUB_WORKSPACE/kernel_workspace/gcc32/bin:$PATH
+        export KBUILD_BUILD_HOST=企鹅交流:722651738
+        export KBUILD_BUILD_USER=kuan-jsbsbxjxh66
+        make -s -j$(nproc --all) O=out ARCH=arm64 oppo6771_${{ github.event.inputs.device }}_defconfig
+        make -j$(nproc --all) CC="ccache clang" O=out ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-
+                
+
+    - name: 制作Anykernel3卡刷包
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        cp android-kernel/out/arch/arm64/boot/Image.gz-dtb android-kernel/Anykernel3/
+        cp -a android-kernel/Anykernel3 android-kernel/out/arch/arm64/boot/anykernel3
+        zip -r android-kernel/out/arch/arm64/boot/安卓P-${{ github.event.inputs.device }}-卡刷包.zip android-kernel/out/arch/arm64/boot/anykernel3
+        
+
+    
+    - name: 上传卡刷包
+      uses: actions/upload-artifact@v4
+      with:
+        name: mtk6771-${{ github.event.inputs.device }}-Anykernel3
+        path: kernel_workspace/android-kernel/out/arch/arm64/boot/anykernel3/*
+        
+
+    - name: 上传编译内核
+      uses: actions/upload-artifact@v4
+      with:
+        name: mtk6771-${{ github.event.inputs.device }}-kernel
+        path: kernel_workspace/android-kernel/out/arch/arm64/boot/*
