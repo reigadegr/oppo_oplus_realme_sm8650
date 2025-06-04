@@ -40,9 +40,10 @@ jobs:
     - name: 构建编译内核环境
       run: |
         sudo apt-get update
-        sudo add-apt-repository ppa:deadsnakes/ppa
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository -y ppa:deadsnakes/ppa
         sudo apt-get update
-        sudo apt install python2.7
+        sudo apt-get install -y python2.7
         sudo -E apt-get -y -qq install git make bc bison ccache openssl dos2unix zip kmod cpio flex libelf-dev curl libssl-dev libtfm-dev wget device-tree-compiler ca-certificates python3 binutils-aarch64-linux-gnu binutils-arm-linux-gnueabi
         mkdir -p $GITHUB_WORKSPACE/kernel_workspace
 
